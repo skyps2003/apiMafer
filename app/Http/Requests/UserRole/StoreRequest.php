@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\UserRole;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,13 +22,8 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'surName' => 'required|string|max:255',
-            'addres' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'gender' => 'required|numeric|in:0,1,2', 
-            'img' => 'nullable', // Ajusta los formatos y tamaño máximo de archivo según tus necesidades
+            'user_id' => ['required'],
+            'rol_id' => ['required']
         ];
     }
 }

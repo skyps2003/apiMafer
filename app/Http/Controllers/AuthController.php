@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Models\UserRole;
 
 class AuthController extends Controller
 {
@@ -18,10 +19,21 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'No autorizado'], 401);
+            return response()->json(['error' => 'Credenciales inválidas'], 401);
         }
 
-        return $this->respondWithToken($token);
+        $user = Auth::user();
+
+        $userRoles = UserRole::where('user_id', $user->id)->get();
+        if ($userRoles->isEmpty()) {
+            return response()->json(['error' => 'Este usuario no tiene roles asignados'], 401);
+        }
+
+        return response()->json([
+            'token' => $token,
+            'user' => $user,
+            'message' => 'Usuario autenticado será redirigido al admin'
+        ]);
     }
 
     public function me()
@@ -35,7 +47,7 @@ class AuthController extends Controller
 
         return response()->json(['mensaje' => 'Cierre de sesión exitoso']);
     }
-    
+
     public function refresh()
     {
         return $this->respondWithToken(auth()->refresh());

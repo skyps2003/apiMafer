@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -26,7 +27,6 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'gender',
-        'rol_id',
         'img'
     ];
 
@@ -60,8 +60,8 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function rol(): BelongsTo
+    public function userRoles():HasMany
     {
-        return $this->belongsTo(Rol::class);
+        return $this->hasMany(UserRole::class);
     }
 }

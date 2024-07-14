@@ -18,7 +18,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::with('rol')->get();
+            $users = User::all();
             return response()->json($users);
         } catch (Exception $e) {
             Log::error('Error al obtener los usuarios: ' . $e->getMessage());
