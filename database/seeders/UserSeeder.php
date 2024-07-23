@@ -19,6 +19,7 @@ class UserSeeder extends Seeder
             'surName' => "wade",
             'addres' => "wade",
             'email' => "wade@gmail.com",
+            'img' => "images/logo_perfil.jpeg",
             'password' => Hash::make('12345678'),
             'gender' => 1,
         ]);

@@ -8,17 +8,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
-class InventoryController extends Controller
+class InventoryController extends BaseController
 {
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:api');
+    // }
     public function index()
     {
         try {
             $inventories = Inventory::with('detailedProduct', 'detailedProduct.product', 'detailedProduct.provider', 'detailedProduct.category')->get();
-            return response()->json($inventories);
+            return $this->sendResponse($inventories, 'Lista de inventarios');
         } catch (Exception $e) {
-            Log::error('Error al obtener los inventarios: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error al obtener los inventarios', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -26,30 +30,22 @@ class InventoryController extends Controller
     {
         try {
             $validated = $request->validated();
-            $expirationDate = now()->addMonths(6);
-            $validated['expiration_date'] = $expirationDate;
+            $validated['created_by'] = Auth::id();
+            $validated['updated_by'] = Auth::id();
             $inventory = Inventory::create($validated);
-            return response()->json(['message' => 'Inventario creado con éxito', 'inventory' => $inventory], 201);
-        } catch (ValidationException $e) {
-            Log::error('Error de validación al crear el inventario: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error de validación', 'errors' => $e->errors()], 422);
-        } catch (Exception $e) {
-            Log::error('Error al crear el inventario: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error al crear el inventario', 'error' => $e->getMessage()], 500);
+            return $this->sendResponse($inventory, 'Inventario creado exitosamente.', 'success', 201);
+        }catch (Exception $e) {
+           return $this->sendError($e->getMessage());
         }
     }
 
     public function show(Inventory $inventory)
     {
         try {
-            $inventory->load('product');
-            return response()->json($inventory);
-        } catch (ModelNotFoundException $e) {
-            Log::error('Inventario no encontrado: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Inventario no encontrado', 'error' => $e->getMessage()], 404);
-        } catch (Exception $e) {
-            Log::error('Error al obtener el inventario: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error al obtener el inventario', 'error' => $e->getMessage()], 500);
+            $inventory->load('detailedProduct');
+            return $this->sendResponse($inventory, 'Inventario encontrado exitosamente');
+        }catch (Exception $e) {
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -57,14 +53,11 @@ class InventoryController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['updated_by'] = Auth::id();
             $inventory->update($validated);
-            return response()->json(['message' => 'Inventario actualizado con éxito', 'inventory' => $inventory]);
-        } catch (ValidationException $e) {
-            Log::error('Error de validación al actualizar el inventario: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error de validación', 'errors' => $e->errors()], 422);
-        } catch (Exception $e) {
-            Log::error('Error al actualizar el inventario: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error al actualizar el inventario', 'error' => $e->getMessage()], 500);
+            return $this->sendResponse($inventory, 'Inventario actualizado exitosamente');
+        }catch (Exception $e) {
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -72,10 +65,9 @@ class InventoryController extends Controller
     {
         try {
             $inventory->delete();
-            return response()->json(['message' => 'Inventario eliminado con éxito']);
+            return $this->sendResponse([], 'Invetario eliminado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al eliminar el inventario: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['message' => 'Error al eliminar el inventario', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 }

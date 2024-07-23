@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('email');
             $table->string('reason');
             $table->string('address');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
         });
     }

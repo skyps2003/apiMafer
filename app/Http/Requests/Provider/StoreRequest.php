@@ -22,9 +22,9 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ruc' => ['required', 'unique:providers,ruc', 'max:20'], 
+            'ruc' => ['required', 'unique:providers,ruc', 'digits:11'], 
             'name' => ['required', 'max:250'],
-            'phone' => ['required', 'unique:providers,phone', 'max:20'], 
+            'phone' => ['required', 'unique:providers,phone', 'digits:9'], 
             'email' => ['required', 'email', 'unique:providers,email', 'max:250'], 
             'address' => ['required', 'max:250'],
             'reason' => ['required', 'max:250']

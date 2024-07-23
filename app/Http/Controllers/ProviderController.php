@@ -6,12 +6,12 @@ use App\Http\Requests\Provider\StoreRequest;
 use App\Http\Requests\Provider\UpdateRequest;
 use App\Models\Provider;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Log;
 use Exception;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Auth;
 
-class ProviderController extends Controller
+class ProviderController extends BaseController
 {
     private $client;
 
@@ -21,6 +21,7 @@ class ProviderController extends Controller
             'base_uri' => 'https://api.apis.net.pe',
             'verify' => false,
         ]);
+        $this->middleware('auth:api');
     }
     /**
      * Display a listing of the resource.
@@ -29,10 +30,9 @@ class ProviderController extends Controller
     {
         try {
             $providers = Provider::all();
-            return response()->json($providers);
+            return $this->sendResponse($providers, 'Lista de proveedores');
         } catch (Exception $e) {
-            Log::error('Error al obtener los proveedores: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener los proveedores']);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -42,11 +42,19 @@ class ProviderController extends Controller
     public function store(StoreRequest $request)
     {
         try {
-            $provider = Provider::create($request->validated());
-            return response()->json(['message' => 'Proveedor creado con éxito', 'provider' => $provider]);
+            $provider = Provider::create([
+                'ruc' => $request->ruc,
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address,
+                'reason' => $request->reason,
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id()
+            ]);
+            return $this->sendResponse($provider, 'Proveedor creado exitosamente', 'success', 201);
         } catch (Exception $e) {
-            Log::error('Error al crear el proveedor: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al crear el proveedor']);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -56,10 +64,9 @@ class ProviderController extends Controller
     public function show(Provider $provider)
     {
         try {
-            return response()->json($provider);
+            return $this->sendResponse($provider, 'Proveedor encontrado');
         } catch (Exception $e) {
-            Log::error('Error al obtener el proveedor: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener el proveedor']);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -69,11 +76,18 @@ class ProviderController extends Controller
     public function update(UpdateRequest $request, Provider $provider)
     {
         try {
-            $provider->update($request->validated());
-            return response()->json(['message' => 'Proveedor actualizado con éxito', 'provider' => $provider]);
+            $provider->update([
+                'ruc' => $request->ruc ?? $provider->ruc,
+                'name' => $request->name ?? $provider->name,
+                'phone' => $request->phone ?? $provider->phone,
+                'email' => $request->email ?? $provider->email,
+                'address' => $request->address ?? $provider->address,
+                'reason' => $request->reason ?? $provider->reason,
+                'updated_by' => Auth::id()
+            ]);
+            return $this->sendResponse($provider, 'Proveedor actualizado correctamente');
         } catch (Exception $e) {
-            Log::error('Error al actualizar el proveedor: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al actualizar el proveedor']);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -84,16 +98,15 @@ class ProviderController extends Controller
     {
         try {
             $provider->delete();
-            return response()->json(['message' => 'Proveedor eliminado con éxito']);
+            return $this->sendResponse([], 'Proveedor eliminado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al eliminar el proveedor: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar el proveedor']);
+            return $this->sendError($e->getMessage());
         }
     }
     public function consultarRuc($rucNumber)
     {
         $token = 'apis-token-9267.Cg5Z55wy2ggaaC9lqFdJnyheToq5KpEZ';
-    
+
         try {
             $res = $this->client->request('GET', '/v2/sunat/ruc', [
                 'http_errors' => false,
@@ -106,7 +119,7 @@ class ProviderController extends Controller
                 ],
                 'query' => ['numero' => $rucNumber],
             ]);
-    
+
             if ($res->getStatusCode() == 200) {
                 $response = json_decode($res->getBody()->getContents(), true);
                 return response()->json($response);
@@ -119,7 +132,6 @@ class ProviderController extends Controller
                 ], $res->getStatusCode());
             }
         } catch (RequestException $e) {
-            Log::error('RequestException: ' . $e->getMessage());
             return response()->json([
                 'error' => 'RequestException',
                 'message' => $e->getMessage(),
@@ -127,7 +139,6 @@ class ProviderController extends Controller
                 'trace' => $e->getTraceAsString(),
             ], 500);
         } catch (ConnectException $e) {
-            Log::error('ConnectException: ' . $e->getMessage());
             return response()->json([
                 'error' => 'ConnectException',
                 'message' => $e->getMessage(),
@@ -135,7 +146,6 @@ class ProviderController extends Controller
                 'trace' => $e->getTraceAsString(),
             ], 500);
         } catch (Exception $e) {
-            Log::error('GeneralException: ' . $e->getMessage());
             return response()->json([
                 'error' => 'GeneralException',
                 'message' => $e->getMessage(),

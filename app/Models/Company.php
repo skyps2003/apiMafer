@@ -5,19 +5,17 @@ namespace App\Models;
 use App\Traits\Audit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Provider extends Model
+class Company extends Model
 {
     use HasFactory;
     use Audit;
     protected $fillable = [
-        'ruc',
         'name',
-        'phone',
-        'email',
+        'description',
+        'img',
         'address',
-        'reason',
+        'phone',
         'created_by',
         'updated_by'
     ];
@@ -34,9 +32,5 @@ class Provider extends Model
     public function editor()
     {
         return $this->belongsTo(User::class, 'updated_by');
-    }
-    public function detailedProducts():HasMany
-    {
-        return $this->hasMany(DetailedProduct::class);
     }
 }

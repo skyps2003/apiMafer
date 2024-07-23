@@ -18,6 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('detailed_product_id');
             $table->string('location');
             $table->date('expiration_date');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
         });
     }

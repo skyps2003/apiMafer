@@ -24,7 +24,7 @@ class UpdateRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255', 'unique:products,name,' . $this->product->id], 
             'description' => ['nullable', 'string', 'max:500'],
-            'img' => ['nullable', 'string'], 
+            'img' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], 
             'price' => ['required', 'numeric', 'min:0']
         ];
     }

@@ -6,19 +6,25 @@ use App\Http\Requests\Product\StoreRequest;
 use App\Http\Requests\Product\UpdateRequest;
 use App\Models\Product;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class ProductController extends Controller
-{
+class ProductController extends BaseController
+{ 
+    protected $defaultImagePath = 'images/void.png'; 
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
     public function index()
     {
         try {
             $products = Product::all();
-            return response()->json($products);
+            return $this->sendResponse($products, 'Lista de productos');
         } catch (Exception $e) {
-            Log::error('Error al obtener los productos: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener los productos'], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -29,26 +35,27 @@ class ProductController extends Controller
 
             if ($request->hasFile('img')) {
                 $image = $request->file('img');
-                $path = $image->store('public/products');
-                $validated['img'] = Storage::url($path);
+                $path = $image->store('images', 'public');
+                $validated['img'] = $path;
+            }else {
+                $validated['img'] = $this->defaultImagePath;
             }
+            $validated['created_by'] = Auth::id();
+            $validated['updated_by'] = Auth::id();
 
             $product = Product::create($validated);
-            return response()->json(['message' => 'Producto creado con éxito', 'product' => $product], 201);
+            return $this->sendResponse($product, 'Producto agregado exitosamente', 'success', 201);
         } catch (Exception $e) {
-            Log::error('Error al crear el producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al crear el producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
     public function show(Product $product)
     {
         try {
-            $product->load('productType', 'category', 'provider');
-            return response()->json($product);
+            return $this->sendResponse($product, 'Producto encontrado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al obtener el producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener el producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -56,30 +63,38 @@ class ProductController extends Controller
     {
         try {
             $validated = $request->validated();
-
-            // Manejo de imagen si se proporciona
+            
             if ($request->hasFile('img')) {
+                if ($product->img && $product->img !== $this->defaultImagePath) {
+                    Storage::delete('public/' . $product->img);
+                }
+                
                 $image = $request->file('img');
-                $path = $image->store('public/products');
-                $validated['img'] = Storage::url($path);
+                $path = $image->store('images', 'public');
+                $validated['img'] = $path;
+            } else {
+                $validated['img'] = $product->img ?: $this->defaultImagePath;
             }
+            $validated['updated_by'] = Auth::id();
 
             $product->update($validated);
-            return response()->json(['message' => 'Producto actualizado con éxito', 'product' => $product]);
+
+            return $this->sendResponse($product, 'Producto actualizado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al actualizar el producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al actualizar el producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
     public function destroy(Product $product)
     {
         try {
+            if ($product->img && $product->img !== $this->defaultImagePath) {
+                Storage::delete('public/' . $product->img);
+            }
             $product->delete();
-            return response()->json(['message' => 'Producto eliminado con éxito']);
+            return $this->sendResponse([], 'Producto eliminado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al eliminar el producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar el producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 }

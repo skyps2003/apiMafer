@@ -22,12 +22,14 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ruc' => ['sometimes', 'required', 'unique:providers,ruc,' . $this->route('provider')->id, 'max:20'],
+            'ruc' => ['sometimes', 'required', 'unique:providers,ruc,' . $this->route('provider')->id, 'digits:11'],
             'name' => ['sometimes', 'required', 'max:250'],
-            'phone' => ['sometimes', 'required', 'unique:providers,phone,' . $this->route('provider')->id, 'max:20'],
+            'phone' => ['sometimes', 'required', 'unique:providers,phone,' . $this->route('provider')->id, 'digits:9'],
             'email' => ['sometimes', 'required', 'email', 'unique:providers,email,' . $this->route('provider')->id, 'max:250'],
             'address' => ['sometimes', 'required', 'max:250'],
             'reason' => ['required', 'max:250']
         ];
     }
 }
+
+

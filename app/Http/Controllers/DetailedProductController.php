@@ -7,10 +7,15 @@ use App\Http\Requests\DetailedProduct\UpdateRequest;
 use App\Models\DetailedProduct;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class DetailedProductController extends Controller
+class DetailedProductController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -18,10 +23,10 @@ class DetailedProductController extends Controller
     {
         try {
             $detailedProducts = DetailedProduct::with('product', 'provider', 'category')->get();
-            return response()->json($detailedProducts);
+            return $this->sendResponse($detailedProducts, 'Lista de detalle producto');
         } catch (Exception $e) {
             Log::error('Error al obtener los detalle productos: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener los detalle productos'], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -32,11 +37,12 @@ class DetailedProductController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['created_by'] = Auth::id();
+            $validated['updated_by'] = Auth::id();
             $detailedProduct = DetailedProduct::create($validated);
-            return response()->json(['message' => 'Detalle producto creado con éxito', 'detailedProduct' => $detailedProduct], 201);
+            return $this->sendResponse($detailedProduct, 'Detalle producto creado exitosamente', 'success', 201);
         } catch (Exception $e) {
-            Log::error('Error al crear el detalle producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al crear el detalle producto'], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -47,10 +53,9 @@ class DetailedProductController extends Controller
     {
         try {
             $detailedProduct->load('product', 'provider', 'category');
-            return response()->json($detailedProduct);
+            return $this->sendResponse($detailedProduct, 'Detalle producto encontrado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al obtener el detalle producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener el detalle producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -61,11 +66,11 @@ class DetailedProductController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['updated_by'] = Auth::id();
             $detailedProduct->update($validated);
-            return response()->json(['message' => 'Detalle producto actualizado con éxito', 'detailedProduct' => $detailedProduct]);
+            return $this->sendResponse($detailedProduct, 'Detalle producto actualizado correctamente');
         } catch (Exception $e) {
-            Log::error('Error al actualizar el Detalle producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al actualizar el Detalle producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -76,10 +81,9 @@ class DetailedProductController extends Controller
     {
         try {
             $detailedProduct->delete();
-            return response()->json(['message' => 'Detalle producto eliminado con éxito']);
+            return $this->sendResponse([], 'Detalle producto eliminado correctamente');
         } catch (Exception $e) {
-            Log::error('Error al eliminar el detalle producto: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar el detalle producto', 'error' => $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 }

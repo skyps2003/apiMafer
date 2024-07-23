@@ -30,9 +30,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'token' => $token,
-            'user' => $user,
-            'message' => 'Usuario autenticado será redirigido al admin'
+            'token' => $token
         ]);
     }
 
