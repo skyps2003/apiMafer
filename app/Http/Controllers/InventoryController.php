@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Inventory\StoreRequest;
 use App\Http\Requests\Inventory\UpdateRequest;
 use App\Models\Inventory;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
@@ -30,6 +31,8 @@ class InventoryController extends BaseController
     {
         try {
             $validated = $request->validated();
+            $validated['location'] = 'En el almacen';
+            $validated['expiration_date'] = Carbon::now()->addMonths(6)->toDateString();
             $validated['created_by'] = Auth::id();
             $validated['updated_by'] = Auth::id();
             $inventory = Inventory::create($validated);

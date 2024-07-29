@@ -216,19 +216,5 @@ class DetailedProductSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
-        DetailedProduct::create([
-            'product_id' => 30,
-            'category_id' => 9,
-            'provider_id' => 1,
-            'created_by' => 1,
-            'updated_by' => 1
-        ]);
-        DetailedProduct::create([
-            'product_id' => 31,
-            'category_id' => 9,
-            'provider_id' => 1,
-            'created_by' => 1,
-            'updated_by' => 1
-        ]);
     }
 }

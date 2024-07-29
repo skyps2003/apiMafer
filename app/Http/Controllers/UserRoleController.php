@@ -11,11 +11,16 @@ use Illuminate\Support\Facades\Log;
 
 class UserRoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        
         try {
             $userRoles = UserRole::with('rol', 'user')->get();
             return response()->json($userRoles);

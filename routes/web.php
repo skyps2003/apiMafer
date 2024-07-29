@@ -1,5 +1,7 @@
 <?php
 
+use App\Mail\ContactMailable;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +17,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('contact', function(){
+    try {
+        Mail::to('freedom01022001@gmail.com')->send(new ContactMailable());
+        return "Mensaje enviado";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
 });

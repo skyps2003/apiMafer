@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerTypeController;
 use App\Http\Controllers\DetailedProductController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\MailTestController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\RolController;
@@ -35,6 +36,8 @@ Route::group([
     Route::post('me', [AuthController::class, 'me']);
 });
 
+Route::get('send-test-mail', [MailTestController::class, 'sendTestMail']);
+
 Route::middleware('auth:api')->group(function()
 {
     Route::apiResource('category', CategoryController::class);
@@ -43,6 +46,12 @@ Route::middleware('auth:api')->group(function()
     Route::apiResource('product', ProductController::class);
     Route::apiResource('detailedProduct', DetailedProductController::class);
     Route::apiResource('company', CompanyController::class);
+    Route::get('consultar-ruc/{rucNumber}', [ProviderController::class, 'consultarRuc']);
+    Route::apiResource('rol', RolController::class);
+    Route::apiResource('user', UserController::class);
+    Route::apiResource('userRole', UserRoleController::class);
+    Route::put('userRole/role/{rol}', [UserRoleController::class, 'role']);
+    
 });
 
 
@@ -50,11 +59,9 @@ Route::group(['prefix'=> 'v1'],function()
 {
    
     Route::apiResource('inventory', InventoryController::class);
-    Route::get('consultar-ruc/{rucNumber}', [ProviderController::class, 'consultarRuc']);
-    Route::apiResource('rol', RolController::class);
-    Route::apiResource('user', UserController::class);
-    Route::apiResource('userRole', UserRoleController::class);
-    Route::put('userRole/role/{rol}', [UserRoleController::class, 'role']);
+    
+    
+    
     Route::apiResource('customerType', CustomerTypeController::class);
     Route::apiResource('customer', CustomerController::class);
 }

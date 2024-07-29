@@ -66,6 +66,7 @@ class DetailedProductController extends BaseController
     {
         try {
             $validated = $request->validated();
+            Log::info('Datos validados para actualización:', $validated);
             $validated['updated_by'] = Auth::id();
             $detailedProduct->update($validated);
             return $this->sendResponse($detailedProduct, 'Detalle producto actualizado correctamente');

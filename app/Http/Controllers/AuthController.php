@@ -16,24 +16,38 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only(['email', 'password']);
-
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Credenciales inválidas'], 401);
-        }
-
-        $user = Auth::user();
-
-        $userRoles = UserRole::where('user_id', $user->id)->get();
-        if ($userRoles->isEmpty()) {
-            return response()->json(['error' => 'Este usuario no tiene roles asignados'], 401);
-        }
-
-        return response()->json([
-            'token' => $token
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'rememberMe' => 'boolean'
         ]);
+    
+        $credentials = $request->only(['email', 'password']);
+        $remember = $request->input('rememberMe', false);
+    
+        try {
+            if (!$token = auth()->attempt($credentials)) {
+                return response()->json(['error' => 'Credenciales inválidas'], 401);
+            }
+    
+            $user = Auth::user();
+            $userRoles = UserRole::where('user_id', $user->id)->get();
+            if ($userRoles->isEmpty()) {
+                return response()->json(['error' => 'Este usuario no tiene roles asignados'], 401);
+            }
+    
+            $ttl = $remember ? 43200 : 3600;
+            auth()->setTTL($ttl);
+    
+            return response()->json([
+                'token' => $token,
+                'message' => 'Usuario autenticado'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     }
-
+    
     public function me()
     {
         return response()->json(auth()->user());

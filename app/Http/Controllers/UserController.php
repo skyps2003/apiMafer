@@ -10,19 +10,19 @@ use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
     public function index()
     {
         try {
             $users = User::all();
-            return response()->json($users);
+            return $this->sendResponse($users, 'Lista de usuarios');
         } catch (Exception $e) {
-            Log::error('Error al obtener los usuarios: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener los usuarios'], 500);
+            return $this->sendError($e->getMessage())    ;
         }
     }
 
@@ -32,13 +32,12 @@ class UserController extends Controller
     public function store(StoreRequest $request)
     {
         try {
-            $data = $request->validated();
-            $data['password'] = Hash::make($data['password']);
-            $user = User::create($data);
-            return response()->json(['message' => 'Usuario creado con éxito', 'user' => new $user], 201);
+            $validated = $request->validated();
+            $validated['password'] = Hash::make($validated['password']);
+            $user = User::create($validated);
+            return $this->sendResponse($user, 'Usuario creado exitosamente','success', 201);
         } catch (Exception $e) {
-            Log::error('Error al crear el usuario: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al crear el usuario'. $e->getMessage()], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 
@@ -48,10 +47,9 @@ class UserController extends Controller
     public function show(User $user)
     {
         try {
-            return response()->json($user);
+            return $this->sendResponse($user,'Usuario encontrado');
         } catch (Exception $e) {
-            Log::error('Error al obtener el usuario: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al obtener el usuario'], 500);
+            return $this->sendError($e->getMessage())    ;
         }
     }
 
@@ -61,15 +59,16 @@ class UserController extends Controller
     public function update(UpdateRequest $request, User $user)
     {
         try {
-            $data = $request->validated();
-            if (isset($data['password'])) {
-                $data['password'] = Hash::make($data['password']);
+            $validated = $request->validated();
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }else{
+                $validated['password'] = $user->password;
             }
-            $user->update($data);
-            return response()->json(['message' => 'Usuario actualizado con éxito', 'user' => new $user], 200);
+            $user->update($validated);
+            return $this->sendResponse($user, 'Usuario actualizado correctamente');
         } catch (Exception $e) {
-            Log::error('Error al actualizar el usuario: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al actualizar el usuario'], 500);
+            return $this->sendError($e->getMessage())    ;
         }
     }
 
@@ -80,10 +79,9 @@ class UserController extends Controller
     {
         try {
             $user->delete();
-            return response()->json(['message' => 'Usuario eliminado con éxito'], 200);
+            return $this->sendResponse([], 'Usuario eliminado exitosamente');
         } catch (Exception $e) {
-            Log::error('Error al eliminar el usuario: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar el usuario'], 500);
+            return $this->sendError($e->getMessage());
         }
     }
 }

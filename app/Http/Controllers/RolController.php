@@ -7,8 +7,12 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class RolController extends Controller
+class RolController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -16,10 +20,9 @@ class RolController extends Controller
     {
         try{
             $rols = Rol::all();
-            return response()->json($rols);
+            return $this->sendResponse($rols, "Lista de roles");
         }catch(Exception $e){
-            Log::error('Error al traer los roles'.$e);
-            return response()->json(['message' => 'Error al traer los roles']);
+            return $this->sendError($e->getMessage());
         }
     }
 

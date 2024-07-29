@@ -25,7 +25,6 @@ class StoreRequest extends FormRequest
             'stock' => ['required', 'integer', 'min:1'], 
             'status' => ['nullable', 'in:1,0,2'], 
             'detailed_product_id' => ['required'],
-            'location' => ['required', 'max:250']
         ];
     }
 }

@@ -35,17 +35,20 @@ class CategoryController extends BaseController
     public function store(StoreRequest $request)
     {
         try {
+            $validated = $request->validated(); // Esto valida la solicitud según las reglas
+    
             $category = Category::create([
-                'name' => $request->name,
-                'description' => $request->description ?? '-- Sin descripción --',
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? '-- Sin descripción --',
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id()
             ]);
             return $this->sendResponse($category, 'Categoria creada exitosamente', 'success', 201);
-        } catch (Exception $e) {
+        }catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
     }
+    
 
     /**
      * Muestra el recurso especificado.

@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             'surName' => "wade",
             'addres' => "wade",
             'email' => "wade@gmail.com",
-            'img' => "images/logo_perfil.jpeg",
+            'img' => "http://127.0.0.1:8000/storage/images/logo_perfil.jpeg",
             'password' => Hash::make('12345678'),
             'gender' => 1,
         ]);
