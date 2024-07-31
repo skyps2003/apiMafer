@@ -73,4 +73,14 @@ class InventoryController extends BaseController
             return $this->sendError($e->getMessage());
         }
     }
+    public function amount()
+    {
+        try{
+            $amount = Inventory::count();
+            return response()->json($amount);
+        }catch(Exception $e)
+        {
+            return $this->sendError($e->getMessage());
+        }
+    }
 }

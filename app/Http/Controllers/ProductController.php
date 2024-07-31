@@ -87,4 +87,14 @@ class ProductController extends BaseController
             return $this->sendError($e->getMessage());
         }
     }
+    public function amount()
+    {
+        try{
+            $amount = Product::count();
+            return response()->json($amount);
+        }catch(Exception $e)
+        {
+            return $this->sendError($e->getMessage());
+        }
+    }
 }

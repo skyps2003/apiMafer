@@ -82,4 +82,15 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
+    public function amount()
+    {
+        try{
+            $amount = Customer::count();
+            return response()->json($amount);
+        }catch(Exception $e)
+        {
+            return $this->sendError($e->getMessage());
+        }
+    }
 }

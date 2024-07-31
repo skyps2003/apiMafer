@@ -42,6 +42,9 @@ Route::middleware('auth:api')->group(function()
 {
     Route::apiResource('category', CategoryController::class);
     Route::post('category/amount', [CategoryController::class, 'amount']);
+    Route::post('detailedProduct/amount', [DetailedProductController::class, 'amount']);;
+    Route::post('product/amount', [ProductController::class, 'amount']);
+    Route::post('provider/amount', [ProviderController::class, 'amount']);
     Route::apiResource('provider', ProviderController::class);
     Route::apiResource('product', ProductController::class);
     Route::apiResource('detailedProduct', DetailedProductController::class);
@@ -60,7 +63,9 @@ Route::group(['prefix'=> 'v1'],function()
    
     Route::apiResource('inventory', InventoryController::class);
     
+    Route::post('inventory/amount', [InventoryController::class, 'amount']);
     
+    Route::post('customer/amount', [CustomerController::class, 'amount']);
     
     Route::apiResource('customerType', CustomerTypeController::class);
     Route::apiResource('customer', CustomerController::class);

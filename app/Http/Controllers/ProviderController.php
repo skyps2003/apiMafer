@@ -154,4 +154,14 @@ class ProviderController extends BaseController
             ], 500);
         }
     }
+    public function amount()
+    {
+        try{
+            $amount = Provider::count();
+            return response()->json($amount);
+        }catch(Exception $e)
+        {
+            return $this->sendError($e->getMessage());
+        }
+    }
 }
